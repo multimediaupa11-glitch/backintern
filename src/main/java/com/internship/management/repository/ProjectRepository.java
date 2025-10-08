@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
@@ -21,5 +22,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     @Query("SELECT p FROM Project p JOIN p.interns i WHERE i.id = :internId")
     List<Project> findByInternId(@Param("internId") Long internId);
+
+    @Query("SELECT p FROM Project p LEFT JOIN FETCH p.interns WHERE p.id = :id")
+    Optional<Project> findByIdWithInterns(@Param("id") Long id);
 
 }

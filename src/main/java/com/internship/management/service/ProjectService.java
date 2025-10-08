@@ -51,7 +51,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public ProjectDTO getProjectById(Long id) {
-        Project project = projectRepository.findById(id)
+        Project project = projectRepository.findByIdWithInterns(id)
                 .orElseThrow(() -> new RuntimeException("PROJECT_NOT_FOUND"));
         return ProjectDTO.fromEntity(project);
     }
@@ -82,6 +82,9 @@ public class ProjectService {
                 intern.setProject(savedProject);
             }
             internRepository.saveAll(interns);
+            internRepository.flush();
+            savedProject = projectRepository.findByIdWithInterns(savedProject.getId())
+                    .orElseThrow(() -> new RuntimeException("PROJECT_NOT_FOUND"));
         }
 
         return ProjectDTO.fromEntity(savedProject);
@@ -107,8 +110,10 @@ public class ProjectService {
             project.setEncadreur(encadreur);
         }
 
+        Project updatedProject = projectRepository.save(project);
+
         if (projectDTO.getAssignedInternIds() != null) {
-            List<Intern> oldInterns = internRepository.findByProject(project);
+            List<Intern> oldInterns = internRepository.findByProject(updatedProject);
             for (Intern intern : oldInterns) {
                 intern.setProject(null);
             }
@@ -116,12 +121,14 @@ public class ProjectService {
 
             List<Intern> newInterns = internRepository.findAllById(projectDTO.getAssignedInternIds());
             for (Intern intern : newInterns) {
-                intern.setProject(project);
+                intern.setProject(updatedProject);
             }
             internRepository.saveAll(newInterns);
+            internRepository.flush();
+            updatedProject = projectRepository.findByIdWithInterns(updatedProject.getId())
+                    .orElseThrow(() -> new RuntimeException("PROJECT_NOT_FOUND"));
         }
 
-        Project updatedProject = projectRepository.save(project);
         return ProjectDTO.fromEntity(updatedProject);
     }
 
@@ -147,6 +154,10 @@ public class ProjectService {
             intern.setProject(project);
         }
         internRepository.saveAll(interns);
+        internRepository.flush();
+
+        project = projectRepository.findByIdWithInterns(projectId)
+                .orElseThrow(() -> new RuntimeException("PROJECT_NOT_FOUND"));
 
         return ProjectDTO.fromEntity(project);
     }
