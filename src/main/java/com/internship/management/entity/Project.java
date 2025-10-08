@@ -48,6 +48,7 @@ public class Project {
 
     private Integer progress;
     private String department;
+    private String stagiaireId;
 
     @CreationTimestamp
     @Column(updatable = false)

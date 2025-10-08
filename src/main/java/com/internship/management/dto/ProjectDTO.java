@@ -22,7 +22,7 @@ public class ProjectDTO {
     private String department;
     private Long encadreurId;
     private String encadreurName;
-    private List<Long> assignedInternIds;
+    private String stagiaireId;
 
     public static ProjectDTO fromEntity(Project project) {
         return ProjectDTO.builder()
@@ -38,8 +38,7 @@ public class ProjectDTO {
                 .encadreurName(project.getEncadreur() != null ?
                         project.getEncadreur().getUser().getPrenom() + " " +
                                 project.getEncadreur().getUser().getNom() : null)
-                .assignedInternIds(project.getInterns() != null ?
-                        project.getInterns().stream().map(i -> i.getId()).collect(Collectors.toList()) : null)
+                .stagiaireId(project.getStagiaireId())
                 .build();
     }
 }
