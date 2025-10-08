@@ -74,18 +74,11 @@ public class ProjectService {
             project.setEncadreur(encadreur);
         }
 
-        Project savedProject = projectRepository.save(project);
-
-        if (projectDTO.getAssignedInternIds() != null && !projectDTO.getAssignedInternIds().isEmpty()) {
-            List<Intern> interns = internRepository.findAllById(projectDTO.getAssignedInternIds());
-            for (Intern intern : interns) {
-                intern.setProject(savedProject);
-            }
-            internRepository.saveAll(interns);
-            internRepository.flush();
-            savedProject = projectRepository.findByIdWithInterns(savedProject.getId())
-                    .orElseThrow(() -> new RuntimeException("PROJECT_NOT_FOUND"));
+        if (projectDTO.getStagiaireId() != null) {
+            project.setStagiaireId(projectDTO.getStagiaireId());
         }
+
+        Project savedProject = projectRepository.save(project);
 
         return ProjectDTO.fromEntity(savedProject);
     }
@@ -110,24 +103,11 @@ public class ProjectService {
             project.setEncadreur(encadreur);
         }
 
-        Project updatedProject = projectRepository.save(project);
-
-        if (projectDTO.getAssignedInternIds() != null) {
-            List<Intern> oldInterns = internRepository.findByProject(updatedProject);
-            for (Intern intern : oldInterns) {
-                intern.setProject(null);
-            }
-            internRepository.saveAll(oldInterns);
-
-            List<Intern> newInterns = internRepository.findAllById(projectDTO.getAssignedInternIds());
-            for (Intern intern : newInterns) {
-                intern.setProject(updatedProject);
-            }
-            internRepository.saveAll(newInterns);
-            internRepository.flush();
-            updatedProject = projectRepository.findByIdWithInterns(updatedProject.getId())
-                    .orElseThrow(() -> new RuntimeException("PROJECT_NOT_FOUND"));
+        if (projectDTO.getStagiaireId() != null) {
+            project.setStagiaireId(projectDTO.getStagiaireId());
         }
+
+        Project updatedProject = projectRepository.save(project);
 
         return ProjectDTO.fromEntity(updatedProject);
     }
