@@ -74,12 +74,16 @@ public class ProjectService {
             project.setEncadreur(encadreur);
         }
 
-        if (projectDTO.getAssignedInternIds() != null) {
+        Project savedProject = projectRepository.save(project);
+
+        if (projectDTO.getAssignedInternIds() != null && !projectDTO.getAssignedInternIds().isEmpty()) {
             List<Intern> interns = internRepository.findAllById(projectDTO.getAssignedInternIds());
-            project.setInterns(interns);
+            for (Intern intern : interns) {
+                intern.setProject(savedProject);
+            }
+            internRepository.saveAll(interns);
         }
 
-        Project savedProject = projectRepository.save(project);
         return ProjectDTO.fromEntity(savedProject);
     }
 
@@ -104,8 +108,17 @@ public class ProjectService {
         }
 
         if (projectDTO.getAssignedInternIds() != null) {
-            List<Intern> interns = internRepository.findAllById(projectDTO.getAssignedInternIds());
-            project.setInterns(interns);
+            List<Intern> oldInterns = internRepository.findByProject(project);
+            for (Intern intern : oldInterns) {
+                intern.setProject(null);
+            }
+            internRepository.saveAll(oldInterns);
+
+            List<Intern> newInterns = internRepository.findAllById(projectDTO.getAssignedInternIds());
+            for (Intern intern : newInterns) {
+                intern.setProject(project);
+            }
+            internRepository.saveAll(newInterns);
         }
 
         Project updatedProject = projectRepository.save(project);
@@ -130,9 +143,11 @@ public class ProjectService {
             throw new RuntimeException("INTERN_NOT_FOUND");
         }
 
-        project.setInterns(interns);
-        Project updatedProject = projectRepository.save(project);
+        for (Intern intern : interns) {
+            intern.setProject(project);
+        }
+        internRepository.saveAll(interns);
 
-        return ProjectDTO.fromEntity(updatedProject);
+        return ProjectDTO.fromEntity(project);
     }
 }

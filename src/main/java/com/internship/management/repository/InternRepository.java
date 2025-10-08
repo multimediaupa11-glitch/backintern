@@ -1,6 +1,7 @@
 package com.internship.management.repository;
 
 import com.internship.management.entity.Intern;
+import com.internship.management.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +13,7 @@ public interface InternRepository extends JpaRepository<Intern, Long> {
     Optional<Intern> findByUserId(Long userId);
     List<Intern> findByEncadreurId(Long encadreurId);
     List<Intern> findByProjectId(Long projectId);
+    List<Intern> findByProject(Project project);
     List<Intern> findByStatus(Intern.InternshipStatus status);
 
 }
